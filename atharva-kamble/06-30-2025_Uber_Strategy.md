@@ -81,7 +81,7 @@ Uber integrates its **mobile app with its web content** to appear in mobile sear
 
 ---
 
-## How You Can Replicate Uber’s Strategy
+<!-- ## How You Can Replicate Uber’s Strategy
 
 Even with fewer resources, a small ride-hailing brand like **Bimride** can use the same principles:
 
@@ -105,7 +105,7 @@ Even with fewer resources, a small ride-hailing brand like **Bimride** can use t
   - Add `rel="alternate"` and `app-links.json` or `apple-app-site-association`
   - Use deep links like `bimride://airport/pickup/barbados` for app handoff
 
----
+--- -->
 
 ## Final Takeaways
 

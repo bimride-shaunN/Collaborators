@@ -104,7 +104,7 @@ Results:
 
 ---
 
-## How to Replicate Uber’s Technical SEO Stack
+<!-- ## How to Replicate Uber’s Technical SEO Stack
 
 Even without a large engineering team, you can optimize your ride-hailing blog or product site using these lean but powerful strategies:
 
@@ -133,7 +133,7 @@ Use:
 - Load third-party scripts only when needed
 - Minify and bundle using modern tools like `esbuild` or `Vite`
 
----
+--- -->
 
 ## Final Takeaways
 

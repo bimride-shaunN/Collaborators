@@ -98,6 +98,7 @@ Uber enhances their local SEO with structured data that helps Google understand 
   "areaServed": "Chicago",
   "url": "https://www.uber.com/global/en/cities/chicago/"
 }
+```
 
 ## Where This Helps Uber Appear in Search
 
