@@ -1,8 +1,8 @@
-# 📋 Bimride Startup – Timesheet Log  
+# 📋 Bimride Startup 
 **Name**: Onkar Yelam  
 **Role**: Founder / Business Analyst  
 **Startup**: Bimride  
-**Week**: 06/23- 06/27  
+**Week**: 06/23- 06/27 
 **Total Hours Logged**: 36 hrs
 
 ---
