@@ -1,7 +1,4 @@
-from pathlib import Path
-
 # Detailed markdown report content
-markdown_report = """
 # Studying of Different Algorithm for Implementing on BimRide
 
 ## 1. Introduction
