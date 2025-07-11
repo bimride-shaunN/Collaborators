@@ -1,10 +1,3 @@
-
-# Studying of Different Algorithm for Implementing on BimRide
-
-## 2. A* (A-Star) Search Algorithm
-
----
-
 ## 1. Introduction
 
 Following our initial exploration of Dijkstra's Algorithm, we now focus on a more intelligent pathfinding method: **A\*** Search. A\* combines Dijkstra’s exhaustive search with heuristic estimation, making it faster and more suitable for real-time routing in large-scale ride-hailing applications like BimRide.

@@ -1,6 +1,4 @@
-# Studying of Different Algorithm for Implementing on BimRide
-
-## 2. DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
+## DBSCAN (Density-Based Spatial Clustering of Applications with Noise)
 
 ## 1. Introduction
 
