@@ -1,8 +1,7 @@
 # 📊 Marketing Research & Content Planning Log
 
 ## 👤 Prepared by: Onkar Yelam  
-## 🗓️ Period: 06/25/2025  
-## 🕒 Estimated Time Spent: 10–12 hours  
+## 🗓️ Period: 06/25/2025 
 
 ---
 
