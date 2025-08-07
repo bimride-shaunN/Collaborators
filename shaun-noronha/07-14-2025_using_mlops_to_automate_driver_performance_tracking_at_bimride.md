@@ -17,16 +17,6 @@ In this technical document, we explore the application of **Using MLOps to Autom
 
 ## ⚙️ Architecture Overview
 
-```mermaid
-graph TD
-    A[User App Request] --> B[API Gateway]
-    B --> C[Prediction Service (FastAPI)]
-    C --> D[ML Model Container (Docker)]
-    D --> E[Model Registry (MLflow)]
-    C --> F[Feature Store (Tecton)]
-    D --> G[Data Monitoring (Prometheus)]
-```
-
 ---
 
 ## 🧠 Algorithms Used
@@ -94,11 +84,4 @@ jobs:
 
 ## ✅ Conclusion
 
-The integration of **Using MLOps to Automate Driver Performance Tracking at Bimride** within Bimride's platform highlights the power of combining MLOps best practices, algorithmic efficiency, and AI-driven decision-making. These methods improve ride reliability, prediction accuracy, and overall customer satisfaction.
-
-# ================================================================================
-# 📄 07-15-2025_how_dsa_concepts_can_optimize_bimride_s_route_planning.md
-# ================================================================================
-
-# How DSA Concepts Can Optimize Bimride's Route Planning
-...
+The integration of **Using ML**
