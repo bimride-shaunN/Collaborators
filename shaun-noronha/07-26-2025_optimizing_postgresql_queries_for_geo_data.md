@@ -1,6 +1,6 @@
 # Optimizing PostgreSQL Queries for Geo Data
 
-**Date:** 07-14-2025  
+**Date:** 07-26-2025  
 **Author:** Shaun Noronha
 
 ## 🔍 Overview
