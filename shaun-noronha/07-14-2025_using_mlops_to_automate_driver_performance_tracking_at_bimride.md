@@ -1,7 +1,3 @@
-# ================================================================================
-# 📄 07-14-2025_using_mlops_to_automate_driver_performance_tracking_at_bimride.md
-# ================================================================================
-
 # Using MLOps to Automate Driver Performance Tracking at Bimride
 
 **Date:** 07-14-2025  
