@@ -5,26 +5,26 @@
 
 ---
 
-## 🚀 Introduction
+## Introduction
 
 In this technical document, we explore the application of **How DSA Concepts Can Optimize Bimride's Route Planning** to improve Bimride’s intelligent transportation system in Barbados. This deep dive addresses how cutting-edge concepts in AI, MLOps, and Data Structures & Algorithms (DSA) can create a smarter, more reliable taxi network.
 
 ---
 
-## ⚙️ Architecture Overview
+## Architecture Overview
 
 The system follows a modular design:
 
-- **User App Request** → API Gateway  
-- **API Gateway** → Prediction Service (FastAPI)  
-- **Prediction Service** ↔ ML Model Container (Docker)  
-- **Prediction Service** ↔ Feature Store (Tecton)  
-- **ML Model** ↔ Model Registry (MLflow)  
-- **ML Model** → Monitoring Tools (Prometheus/Grafana)  
+- User App Request → API Gateway  
+- API Gateway → Prediction Service (FastAPI)  
+- Prediction Service ↔ ML Model Container (Docker)  
+- Prediction Service ↔ Feature Store (Tecton)  
+- ML Model ↔ Model Registry (MLflow)  
+- ML Model → Monitoring Tools (Prometheus/Grafana)  
 
 ---
 
-## 🧠 Algorithms Used
+## Algorithms Used
 
 ### Example: Dijkstra’s Algorithm for Shortest Path
 
@@ -54,23 +54,23 @@ def dijkstra(graph, start):
 
 ---
 
-## 🔁 Application to Bimride
+## Application to Bimride
 
-- **Graph Nodes**: Pickup & drop-off locations.
-- **Edge Weights**: Travel time based on traffic, road length, conditions.
-- **Usage**: Compute most efficient driver routes across Barbados dynamically.
+- **Graph Nodes**: Pickup & drop-off locations  
+- **Edge Weights**: Travel time based on traffic, road length, and conditions  
+- **Usage**: Compute most efficient driver routes across Barbados dynamically  
 
 ---
 
-## 🔍 Real-World Scenario
+## Real-World Scenario
 
 **Use Case**: Bimride wants to reduce fuel costs and delays by finding the shortest and fastest routes in high-density areas like Bridgetown.
 
-**Solution**: Apply Dijkstra’s algorithm using updated road graph data every 5 minutes.
+**Solution**: Apply Dijkstra’s algorithm using updated road graph data every 5 minutes, ensuring real-time dynamic routing based on evolving traffic conditions.
 
 ---
 
-## 📊 Tools and Technologies
+## Tools and Technologies
 
 | Component       | Tool/Tech                  |
 |------------------|----------------------------|
@@ -81,6 +81,6 @@ def dijkstra(graph, start):
 
 ---
 
-## ✅ Conclusion
+## Conclusion
 
 By applying fundamental DSA concepts such as **graphs, heaps, and shortest path algorithms**, Bimride can achieve real-time, optimal route planning for drivers. This enhances user experience, improves fuel efficiency, and increases the overall productivity of the service.
