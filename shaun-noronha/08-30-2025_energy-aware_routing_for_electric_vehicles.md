@@ -7,27 +7,45 @@
 
 ## 🚀 Introduction
 
-This file documents **Energy-Aware Routing for Electric Vehicles** as part of Bimride’s progress in Barbados. 
-It highlights algorithms, CI/CD pipelines, and local context (e.g. Grantley Adams International Airport (BGI)). 
-The goal is to show clear proof-of-work for nonprofit auditing and long-term background checks.
+Energy constraints change routing: an EV must arrive with safe reserve and may require a charging stop. We adapt shortest-path to respect battery limits and charger availability.
 
 ---
 
 ## ⚙️ Architecture Overview
 
-- Monitoring: domain KPIs logged to Prometheus, dashboards in Grafana.
-- Scalability: containerized services deployed to Azure Kubernetes Service.
-- Processing: mix of batch ETL and low-latency inference.
-- Security: API keys stored in Key Vault; TLS everywhere.
-- Data sources: ride logs, external APIs, and survey data.
+
+```
+[Road Graph + Elevation] + [Chargers] + [SoC] -> [Energy-Constrained Dijkstra] -> [Route + Stops]
+```
+Notes:
+- Slope-adjusted energy model; avoid steep climbs when marginal.
+- Charger status pulled every 5 minutes; routes recomputed if station goes offline.
+
 
 ---
 
 ## 🧠 Algorithms Used
 
 ```python
-def energy_cost(distance_km, efficiency=6.0):
-    return distance_km/efficiency
+import heapq, math
+
+def dijkstra_energy(graph, start, goal, kwh, eff_km_per_kwh=6.0, reserve=0.5):
+    # graph: {node: [(nbr, dist_km, slope)]}
+    pq = [(0, start, kwh)]  # (cost, node, remaining_kwh)
+    seen = set()
+    while pq:
+        cost, node, rem = heapq.heappop(pq)
+        if (node, round(rem,2)) in seen: 
+            continue
+        seen.add((node, round(rem,2)))
+        if node == goal and rem >= reserve: 
+            return cost
+        for nbr, dist, slope in graph.get(node, []):
+            # simple slope factor
+            energy = dist/eff_km_per_kwh * (1 + 0.3*max(0,slope))
+            if rem - energy >= 0:
+                heapq.heappush(pq, (cost+dist, nbr, rem-energy))
+    return math.inf
 ```
 
 ---
@@ -35,51 +53,45 @@ def energy_cost(distance_km, efficiency=6.0):
 ## 🔁 MLOps Workflow Example
 
 ```yaml
-# .github/workflows/energy-aware-routing-for-electric-vehicles.yml
-name: Energy-Aware Routing for Electric Vehicles Workflow
-on: [push, workflow_dispatch]
+name: ev-routing-nightly
+on:
+  schedule:
+    - cron: "0 1 * * *"
 jobs:
-  build:
+  refresh-elevation-chargers-train:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - name: Install Deps
-        run: pip install -r requirements.txt
-      - name: Run Tests
-        run: pytest -q
-      - name: Build Service
-        run: docker build . -t bimride/energy-aware-routing-for-electric-vehicles:$GITHUB_SHA
+      - name: Update elevation tiles
+        run: python data/elevation_sync.py --region barbados
+      - name: Sync charger status
+        run: python data/chargers_sync.py --provider all
+      - name: Validate energy model
+        run: python models/validate_energy.py --mae-threshold 0.12
 ```
 
 ---
 
 ## 🔍 Real-World Scenario
 
-
-**Use Case**: Deploy **Energy-Aware Routing for Electric Vehicles** for Bimride riders in Grantley Adams International Airport (BGI).  
-**Solution**: Pilot in limited region, track KPIs, scale up if positive impact.
-
+A taxi in **Harrison’s Cave** at 35% SoC gets routed via a reliable charger, arriving at the destination with 12% reserve despite hills.
 
 ---
 
 ## 📊 Tools and Technologies
 
 
-| Component      | Tool                     |
-|----------------|--------------------------|
-| Model Training | PyTorch / Scikit-learn   |
-| API Layer      | FastAPI + Azure          |
-| Storage        | Postgres + Delta Lake    |
-| Monitoring     | Prometheus + Grafana     |
+| Component                | Tool/Tech                          |
+|--------------------------|------------------------------------|
+| Routing                  | OSRM / Valhalla + custom energy    |
+| Data                     | SRTM elevation + charger feeds     |
+| Serving                  | gRPC microservice                  |
+| Caching                  | Redis                               |
+| Infra                    | AKS + Spot nodes for batch         |
 
 
 ---
 
 ## ✅ Conclusion
 
-
-By implementing **Energy-Aware Routing for Electric Vehicles**, Bimride strengthens its ecosystem in Barbados while producing
-verifiable technical artifacts for nonprofit governance.
-
+This work on **Energy-Aware Routing for Electric Vehicles** is tailored to Bimride’s Barbados context and serves as a concrete, auditable progress artifact.
