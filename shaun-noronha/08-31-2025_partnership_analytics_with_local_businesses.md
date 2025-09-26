@@ -7,19 +7,22 @@
 
 ## 🚀 Introduction
 
-This file documents **Partnership Analytics with Local Businesses** as part of Bimride’s progress in Barbados. 
-It highlights algorithms, CI/CD pipelines, and local context (e.g. Bridgetown Harbour & Cruise Terminal). 
-The goal is to show clear proof-of-work for nonprofit auditing and long-term background checks.
+Partnerships with hotels, restaurants, and tour operators drive growth. We quantify partner performance and optimize commissions transparently.
 
 ---
 
 ## ⚙️ Architecture Overview
 
-- Processing: mix of batch ETL and low-latency inference.
-- Scalability: containerized services deployed to Azure Kubernetes Service.
-- Monitoring: domain KPIs logged to Prometheus, dashboards in Grafana.
-- Data sources: ride logs, external APIs, and survey data.
-- Security: API keys stored in Key Vault; TLS everywhere.
+
+```
+[Referral Clicks] + [Ride Logs] -> [Attribution Model] -> [Partner Scorecard API]
+                                          |
+                                          v
+                                   [Commission Engine]
+```
+- Multi-touch attribution splits credit when riders browse multiple partners.
+- Outlier detection flags suspicious referral spikes.
+
 
 ---
 
@@ -27,8 +30,24 @@ The goal is to show clear proof-of-work for nonprofit auditing and long-term bac
 
 ```python
 import pandas as pd
-def top_partners(df):
-    return df.groupby('partner')['rides'].sum().sort_values(ascending=False).head(5)
+
+def partner_kpi(df):
+    # df columns: partner, rides, revenue, commission_rate
+    df = df.copy()
+    df["net"] = df["revenue"] - df["revenue"]*df["commission_rate"]
+    grouped = df.groupby("partner").agg(rides=("rides","sum"),
+                                        revenue=("revenue","sum"),
+                                        net=("net","sum")).reset_index()
+    grouped["roi"] = (grouped["net"] / grouped["revenue"]).round(3)
+    return grouped.sort_values("roi", ascending=False)
+
+sample = pd.DataFrame({
+    "partner":["Hotel A","Tour B","Restaurant C","Hotel A"],
+    "rides":[120,80,60,95],
+    "revenue":[3600,2400,900,2800],
+    "commission_rate":[0.18,0.20,0.12,0.18]
+})
+print(partner_kpi(sample))
 ```
 
 ---
@@ -36,51 +55,45 @@ def top_partners(df):
 ## 🔁 MLOps Workflow Example
 
 ```yaml
-# .github/workflows/partnership-analytics-with-local-businesses.yml
-name: Partnership Analytics with Local Businesses Workflow
-on: [push, workflow_dispatch]
+name: partner-analytics-monthly
+on:
+  schedule:
+    - cron: "0 3 1 * *" # 1st of each month
 jobs:
-  build:
+  aggregate-scorecard:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - name: Install Deps
-        run: pip install -r requirements.txt
-      - name: Run Tests
-        run: pytest -q
-      - name: Build Service
-        run: docker build . -t bimride/partnership-analytics-with-local-businesses:$GITHUB_SHA
+      - name: Install
+        run: pip install -r analytics/requirements.txt
+      - name: Build attribution model
+        run: python analytics/attribution.py --lookback 7d
+      - name: Publish partner scorecards
+        run: python analytics/publish.py --dest s3://bimride/partners
 ```
 
 ---
 
 ## 🔍 Real-World Scenario
 
-
-**Use Case**: Deploy **Partnership Analytics with Local Businesses** for Bimride riders in Speightstown (St. Peter).  
-**Solution**: Pilot in limited region, track KPIs, scale up if positive impact.
-
+In **Holetown (St. James)**, a boutique hotel drives high-value rides with minimal discounts. The scorecard recommends a small commission bump and co-marketing through Bimride ads.
 
 ---
 
 ## 📊 Tools and Technologies
 
 
-| Component      | Tool                     |
-|----------------|--------------------------|
-| Model Training | PyTorch / Scikit-learn   |
-| API Layer      | FastAPI + Azure          |
-| Storage        | Postgres + Delta Lake    |
-| Monitoring     | Prometheus + Grafana     |
+| Component                | Tool/Tech                          |
+|--------------------------|------------------------------------|
+| Analytics                | Pandas + DuckDB                    |
+| Warehousing              | Delta Lake + Azure Blob            |
+| Dashboards               | Metabase / Power BI                |
+| Serving                  | FastAPI + PostgREST                |
+| Alerts                   | Grafana + email/webhooks           |
 
 
 ---
 
 ## ✅ Conclusion
 
-
-By implementing **Partnership Analytics with Local Businesses**, Bimride strengthens its ecosystem in Barbados while producing
-verifiable technical artifacts for nonprofit governance.
-
+This work on **Partnership Analytics with Local Businesses** is tailored to Bimride’s Barbados context and serves as a concrete, auditable progress artifact.
