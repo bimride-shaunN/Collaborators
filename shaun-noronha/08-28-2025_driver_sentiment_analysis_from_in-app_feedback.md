@@ -7,27 +7,38 @@
 
 ## 🚀 Introduction
 
-This file documents **Driver Sentiment Analysis from In-App Feedback** as part of Bimride’s progress in Barbados. 
-It highlights algorithms, CI/CD pipelines, and local context (e.g. Grantley Adams International Airport (BGI)). 
-The goal is to show clear proof-of-work for nonprofit auditing and long-term background checks.
+Understanding driver sentiment helps Bimride improve policies and reduce churn. We build a labeled corpus from in‑app feedback and fine‑tune a small transformer.
 
 ---
 
 ## ⚙️ Architecture Overview
 
-- Security: API keys stored in Key Vault; TLS everywhere.
-- Processing: mix of batch ETL and low-latency inference.
-- Monitoring: domain KPIs logged to Prometheus, dashboards in Grafana.
-- Scalability: containerized services deployed to Azure Kubernetes Service.
-- Data sources: ride logs, external APIs, and survey data.
+
+```
+[Feedback Text] -> [PII Scrubber] -> [Labeling (Human + Rules)] -> [Finetune DistilBERT]
+                                                         \----> [Lexicon baseline]
+Serving: REST API returns sentiment + key phrases; dashboard tracks trends by parish.
+```
+Considerations:
+- Opt-in for feedback usage.
+- Anonymize and aggregate before analytics.
+
 
 ---
 
 ## 🧠 Algorithms Used
 
 ```python
-from textblob import TextBlob
-def polarity(text): return TextBlob(text).sentiment.polarity
+# Pseudo inference using a transformer-like output
+import numpy as np
+
+def softmax(x):
+    e = np.exp(x - np.max(x)); return e/e.sum()
+
+logits = np.array([1.2, -0.3, 0.1])  # [positive, negative, neutral]
+probs = softmax(logits)
+label = ["positive","negative","neutral"][int(np.argmax(probs))]
+print({"label": label, "probs": probs.round(3).tolist()})
 ```
 
 ---
@@ -35,51 +46,47 @@ def polarity(text): return TextBlob(text).sentiment.polarity
 ## 🔁 MLOps Workflow Example
 
 ```yaml
-# .github/workflows/driver-sentiment-analysis-from-in-app-feedback.yml
-name: Driver Sentiment Analysis from In-App Feedback Workflow
-on: [push, workflow_dispatch]
+name: sentiment-train
+on:
+  schedule:
+    - cron: "30 1 * * *"   # daily
 jobs:
-  build:
+  train-eval-promote:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - name: Install Deps
-        run: pip install -r requirements.txt
-      - name: Run Tests
-        run: pytest -q
-      - name: Build Service
-        run: docker build . -t bimride/driver-sentiment-analysis-from-in-app-feedback:$GITHUB_SHA
+      - name: Install
+        run: pip install -r nlp/requirements.txt
+      - name: Train
+        run: python nlp/train_sentiment.py --model distilbert-base-uncased --epochs 3
+      - name: Evaluate
+        run: python nlp/eval.py --f1-threshold 0.82
+      - name: Package & push
+        run: python nlp/package.py && dvc add models/ && dvc push
 ```
 
 ---
 
 ## 🔍 Real-World Scenario
 
-
-**Use Case**: Deploy **Driver Sentiment Analysis from In-App Feedback** for Bimride riders in Speightstown (St. Peter).  
-**Solution**: Pilot in limited region, track KPIs, scale up if positive impact.
-
+Drivers around **Grantley Adams International Airport (BGI)** report long pickup waits during rain. The dashboard lights up with negative scores, prompting temporary incentives for drivers to reposition.
 
 ---
 
 ## 📊 Tools and Technologies
 
 
-| Component      | Tool                     |
-|----------------|--------------------------|
-| Model Training | PyTorch / Scikit-learn   |
-| API Layer      | FastAPI + Azure          |
-| Storage        | Postgres + Delta Lake    |
-| Monitoring     | Prometheus + Grafana     |
+| Component                | Tool/Tech                          |
+|--------------------------|------------------------------------|
+| NLP                      | DistilBERT / spaCy                 |
+| Labeling                 | Prodigy + rule-based seed labels   |
+| Serving                  | FastAPI + ONNX Runtime             |
+| Storage                  | Delta Lake                         |
+| Dashboards               | Grafana + Grafana Alerting         |
 
 
 ---
 
 ## ✅ Conclusion
 
-
-By implementing **Driver Sentiment Analysis from In-App Feedback**, Bimride strengthens its ecosystem in Barbados while producing
-verifiable technical artifacts for nonprofit governance.
-
+This work on **Driver Sentiment Analysis from In-App Feedback** is tailored to Bimride’s Barbados context and serves as a concrete, auditable progress artifact.
