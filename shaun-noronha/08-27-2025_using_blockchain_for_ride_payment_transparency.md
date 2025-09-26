@@ -7,28 +7,37 @@
 
 ## 🚀 Introduction
 
-This file documents **Using Blockchain for Ride Payment Transparency** as part of Bimride’s progress in Barbados. 
-It highlights algorithms, CI/CD pipelines, and local context (e.g. St. Lawrence Gap). 
-The goal is to show clear proof-of-work for nonprofit auditing and long-term background checks.
+Transparent payments reduce disputes and improve trust with regulators. We record ride hashes on-chain and store full details off-chain for privacy and scalability.
 
 ---
 
 ## ⚙️ Architecture Overview
 
-- Monitoring: domain KPIs logged to Prometheus, dashboards in Grafana.
-- Processing: mix of batch ETL and low-latency inference.
-- Scalability: containerized services deployed to Azure Kubernetes Service.
-- Security: API keys stored in Key Vault; TLS everywhere.
-- Data sources: ride logs, external APIs, and survey data.
+
+```
+[Ride Service] -> [Payment Service] -> [Hasher] -> [On-chain Tx Hash]
+                                   \-> [Encrypted Off-chain Ledger]
+Regulator UI -> verifies hash matches receipt; PII never touches chain.
+```
+Design choices:
+- Sidechain with low fees; periodic checkpoints to mainnet.
+- Hash includes fare, timestamps, vehicle id; no PII.
+
 
 ---
 
 ## 🧠 Algorithms Used
 
 ```python
-class Block:
-    def __init__(self, prev, data):
-        self.prev=prev; self.data=data
+import hashlib, json
+
+def ride_hash(receipt: dict, salt="bimride"):
+    # Keep PII out: only hashed metadata
+    payload = {k: receipt[k] for k in ["fare","start_ts","end_ts","vehicle_id"]}
+    blob = json.dumps(payload, sort_keys=True).encode()
+    return hashlib.sha256((salt.encode()+blob)).hexdigest()
+
+print(ride_hash({"fare":18.5,"start_ts":1693170000,"end_ts":1693171800,"vehicle_id":"BB-123"}))
 ```
 
 ---
@@ -36,51 +45,50 @@ class Block:
 ## 🔁 MLOps Workflow Example
 
 ```yaml
-# .github/workflows/using-blockchain-for-ride-payment-transparency.yml
-name: Using Blockchain for Ride Payment Transparency Workflow
-on: [push, workflow_dispatch]
+name: solidity-ci
+on:
+  push:
+    paths:
+      - 'contracts/**'
 jobs:
-  build:
+  build-test-deploy:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
-        with: { python-version: '3.11' }
-      - name: Install Deps
-        run: pip install -r requirements.txt
-      - name: Run Tests
-        run: pytest -q
-      - name: Build Service
-        run: docker build . -t bimride/using-blockchain-for-ride-payment-transparency:$GITHUB_SHA
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Install deps
+        run: npm ci --prefix contracts
+      - name: Compile + Test
+        run: npm test --prefix contracts
+      - name: Deploy to testnet
+        run: npm run deploy:testnet --prefix contracts
 ```
 
 ---
 
 ## 🔍 Real-World Scenario
 
-
-**Use Case**: Deploy **Using Blockchain for Ride Payment Transparency** for Bimride riders in Holetown (St. James).  
-**Solution**: Pilot in limited region, track KPIs, scale up if positive impact.
-
+In **Harrison’s Cave**, a rider questions a fare. Support locates the ride receipt, verifies the on-chain hash, and the case closes without manual data digging.
 
 ---
 
 ## 📊 Tools and Technologies
 
 
-| Component      | Tool                     |
-|----------------|--------------------------|
-| Model Training | PyTorch / Scikit-learn   |
-| API Layer      | FastAPI + Azure          |
-| Storage        | Postgres + Delta Lake    |
-| Monitoring     | Prometheus + Grafana     |
+| Component                | Tool/Tech                          |
+|--------------------------|------------------------------------|
+| Smart Contracts          | Solidity + Hardhat                 |
+| Off-chain Storage        | Postgres (encrypted columns)       |
+| Hashing                  | SHA-256 with salt                  |
+| Explorer                 | Blockscout                         |
+| CI/CD                    | Node + Hardhat tests               |
 
 
 ---
 
 ## ✅ Conclusion
 
-
-By implementing **Using Blockchain for Ride Payment Transparency**, Bimride strengthens its ecosystem in Barbados while producing
-verifiable technical artifacts for nonprofit governance.
-
+This work on **Using Blockchain for Ride Payment Transparency** is tailored to Bimride’s Barbados context and serves as a concrete, auditable progress artifact.
